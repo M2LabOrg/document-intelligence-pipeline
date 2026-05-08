@@ -4,6 +4,25 @@
 
 Build a system where users upload complex PDFs containing tables, infographics and figures, have them processed automatically by AI, and query the results immediately. The output must be visible on screen within minutes of deployment.
 
+## Environment Setup
+
+Before writing any code, ask the user for:
+
+1. **Azure subscription name** (or subscription ID)
+2. **Preferred Azure region** (e.g. `eastus2`, `westeurope`) — must support Azure AI Document Intelligence and Azure AI Foundry
+3. **A short project prefix** (e.g. `docpipe`) used to name all Azure resources consistently, avoiding collisions
+
+Create a `.env` file at the project root with these values:
+
+```
+AZURE_SUBSCRIPTION_NAME=<provided by user>
+AZURE_SUBSCRIPTION_ID=<provided by user>
+AZURE_REGION=<provided by user>
+PROJECT_PREFIX=<provided by user>
+```
+
+Add `.env` to `.gitignore` immediately. Reference these values in the Bicep parameter files and application configuration. Never hardcode subscription, region, or resource names in source files.
+
 ## Core Services
 
 * Azure AI Foundry as the orchestration backbone
@@ -18,7 +37,7 @@ Build a system where users upload complex PDFs containing tables, infographics a
 Process each uploaded PDF through the following stages in sequence:
 
 **Stage 1 -- Extraction**
-Run the document through Azure AI Document Intelligence to extract text, tables, reading order and layout structure. For any figure or infographic detected, crop the image and pass it to GPT-5 with the prompt: "Describe the key information in this figure clearly and concisely for use in a retrieval system."
+Run the document through Azure AI Document Intelligence using the `prebuilt-layout` model to extract text, tables, reading order, layout structure, and figure bounding regions. For any figure or infographic detected, crop the image and pass it to GPT-5 with the prompt: "Describe the key information in this figure clearly and concisely for use in a retrieval system."
 
 **Stage 2 -- Chunking**
 Split all extracted content, including figure descriptions, into overlapping chunks of around 512 tokens with roughly 10% overlap. Treat tables and figure captions as discrete chunks and never split them mid-content.
@@ -44,7 +63,7 @@ Push each JSON chunk as a document into Azure AI Search. Map the fields directly
 
 ## Front End
 
-Build a simple Flask or React app hosted on Azure App Services. The UI must include:
+Build a Python Flask application (Python 3.11+) hosted on Azure App Services. The Flask app serves both the front end and the processing API — no separate backend service is needed for the initial build. The UI must include:
 
 * A drag-and-drop or file selector for PDF uploads
 * Real-time status feedback during processing, showing which stage is active
@@ -55,7 +74,8 @@ Build a simple Flask or React app hosted on Azure App Services. The UI must incl
 
 * PDF files only
 * Maximum file size of 20MB per upload
-* No exotic or uncommon dependencies
+* Python 3.11+ with standard PyPI dependencies only
+* Azure AI Search: use the **Basic** tier (sufficient for demo; supports up to 15 indexes and 2 GB storage)
 * Must be fully deployed and usable within 30 minutes using standard Azure services
 
 ## Specs to Generate Before Any Code
@@ -72,11 +92,12 @@ Produce the following as a single document before writing any code:
 
 Use Bicep files to define and track every Azure resource provisioned during the build. Each service -- Blob Storage, Document Intelligence, Azure AI Search, App Services and AI Foundry -- must have a corresponding Bicep definition. This serves two purposes: it makes the deployment fully repeatable, and it gives auditors a clear record of exactly what was provisioned and how.
 
-Organise the Bicep files as follows:
+All Bicep files must accept `location` and `projectPrefix` as parameters, reading defaults from the `.env`-backed parameter file. Organise the Bicep files as follows:
 
 ```
 infra/
   main.bicep                          -- entry point, ties all modules together
+  main.bicepparam                     -- parameter values sourced from .env
   modules/
     storage.bicep                     -- Blob Storage account and containers
     document-intelligence.bicep       -- Document Intelligence resource
