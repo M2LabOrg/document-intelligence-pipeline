@@ -87,11 +87,11 @@ packages:
   - M2LabOrg/document-intelligence-pipeline
 ```
 
-Then run `apm install`. APM pulls `.instructions.md` into your agent's context — no manual copy-pasting needed.
+Then run `apm install`. APM pulls the instructions into your agent's context — no manual copy-pasting needed.
 
 ### Option B: Direct copy-paste
 
-1. Open [`initial-prompt.md`](./initial-prompt.md)
+1. Open [`.apm/instructions/document-intelligence-pipeline.instructions.md`](./.apm/instructions/document-intelligence-pipeline.instructions.md)
 2. Copy the full contents
 3. Paste into your AI coding assistant (GitHub Copilot, Claude, Cursor, Gemini, etc.)
 4. Review the generated spec, then ask the assistant to produce code and Bicep files
@@ -133,7 +133,6 @@ This spec-first approach means you review the design *before* a single line of c
 ├── .apm/
 │   └── instructions/
 │       └── document-intelligence-pipeline.instructions.md
-├── initial-prompt.md                # Same prompt, standalone human-readable version
 └── README.md
 ```
 
