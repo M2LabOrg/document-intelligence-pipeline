@@ -129,9 +129,11 @@ This spec-first approach means you review the design *before* a single line of c
 
 ```
 .
-├── apm.yml              # APM package manifest
-├── .instructions.md     # Prompt in APM-standard instructions format
-├── initial-prompt.md    # Same prompt, standalone human-readable version
+├── apm.yml                          # APM package manifest
+├── .apm/
+│   └── instructions/
+│       └── document-intelligence-pipeline.instructions.md
+├── initial-prompt.md                # Same prompt, standalone human-readable version
 └── README.md
 ```
 

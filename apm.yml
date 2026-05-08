@@ -6,6 +6,4 @@ description: >
   Intelligence, Azure AI Search, Blob Storage, Azure AI Foundry, and GPT-5.
 license: MIT
 homepage: https://github.com/M2LabOrg/document-intelligence-pipeline
-
-instructions:
-  - path: .instructions.md
+includes: auto
